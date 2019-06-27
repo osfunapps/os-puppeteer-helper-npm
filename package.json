@@ -1,0 +1,24 @@
+{
+  "name": "os-puppeteer-helper",
+  "version": "1.0.1",
+  "description": "an intuitive module to help with puppeteer related functions",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/osfunapps/os-firebase-rtd-npm"
+  },
+  "dependencies": {
+    "os-tools": "1.0.2",
+    "puppeteer": "^1.18.0"
+  },
+  "keywords": [
+    "puppeteer",
+    "node",
+    "js",
+    "helper",
+    "osfunapps",
+    "os"
+  ],
+  "author": "osfunapps",
+  "license": "ISC"
+}
