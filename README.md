@@ -91,7 +91,7 @@ a short example of initiating a purchase from ebay:
 
 ## Additional notes
 
-If you're trying to web scrape, consider integrate this module with [os-cheerio-helper](https://www.npmjs.com/package/os-cheerio-helper) for more professional use.  
+If you're trying to web scrape, consider integrate this module with [os-cheerio-helper](https://github.com/osfunapps/os-cheerio-helper-npm) for more professional use.  
 
 ## Links
 [npm os-puppeteer-helper](https://www.npmjs.com/package/os-puppeteer-helper)
