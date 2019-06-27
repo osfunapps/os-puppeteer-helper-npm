@@ -3,6 +3,7 @@ Introduction
 
 This project meant to provide intuitive functions to use Google's Puppeteer, without wasting time.
 
+You can scroll down for a cool ebay example!
 
 ## Installation and use
 
