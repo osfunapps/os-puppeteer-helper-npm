@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/osfunapps/os-puppeteer-helper-nm"
+    "url": "https://github.com/osfunapps/os-puppeteer-helper-npm"
   },
   "dependencies": {
     "os-tools": "1.0.2",
