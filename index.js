@@ -184,7 +184,7 @@ const self = module.exports = {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             for (let i = 0; i < allEle.length; i++) {
-                if (allEle[i].innerText === text) {
+                if (allEle[i].innerText.includes(text)){
                     allEle[i].click()
                 }
             }
