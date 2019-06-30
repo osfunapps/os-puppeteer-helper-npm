@@ -164,10 +164,10 @@ const self = module.exports = {
 
     /**
      * will click on an element which contains text
-     * for example("div", "Floki") will click on a div with an innerHTML of "Floki" (uppercase sensitive)
+     * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
      * @param page -> the puppeteer page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
-     * @param text -> the element's innerHTML
+     * @param text -> the element's innerText
      * @param delayAfterClick -> optional delay after click
      * @param selectorToFindAfterClick -> optional element to look for after click
      * @param howLongToWaitForSelector -> optional time to look for the element after click
@@ -184,7 +184,7 @@ const self = module.exports = {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             for (let i = 0; i < allEle.length; i++) {
-                if (allEle[i].innerHTML === text) {
+                if (allEle[i].innerText === text) {
                     allEle[i].click()
                 }
             }
