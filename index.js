@@ -95,6 +95,16 @@ const self = module.exports = {
     },
 
     /**
+     * will read text from an element
+     */
+    readText: async function (page, selector, delayAfter = 0) {
+        const element = await page.$(selector);
+        const text = await (await element.getProperty('innerText')).jsonValue();
+        await tools.delay(delayAfter)
+        return text
+    },
+
+    /**
      * will click a selector
      * @param page -> the current page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
