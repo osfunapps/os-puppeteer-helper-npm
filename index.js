@@ -178,6 +178,7 @@ const self = module.exports = {
      * @param page -> the puppeteer page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
      * @param text -> the element's innerText
+     * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
      * @param delayAfterClick -> optional delay after click
      * @param selectorToFindAfterClick -> optional element to look for after click
      * @param howLongToWaitForSelector -> optional time to look for the element after click
@@ -186,6 +187,7 @@ const self = module.exports = {
     clickOnElementContainsText: async function (page,
                                                 selector,
                                                 text,
+                                                caseSensitive = false,
                                                 delayAfterClick = 0,
                                                 selectorToFindAfterClick = null,
                                                 howLongToWaitForSelector = null,
@@ -193,8 +195,15 @@ const self = module.exports = {
         await page.evaluate(function (selector, text) {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
+            if(!caseSensitive) {
+                text = text.toLowerCase()
+            }
             for (let i = 0; i < allEle.length; i++) {
-                if (allEle[i].innerText.includes(text)){
+                let eleText = allEle[i].innerText;
+                if(!caseSensitive) {
+                    eleText = eleText.toLowerCase()
+                }
+                if (eleText.includes(text)){
                     allEle[i].click()
                 }
             }
