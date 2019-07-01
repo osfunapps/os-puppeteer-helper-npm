@@ -192,7 +192,7 @@ const self = module.exports = {
                                                 selectorToFindAfterClick = null,
                                                 howLongToWaitForSelector = null,
                                                 delayAfterSelectorFound = 1500) {
-        await page.evaluate(function (selector, text) {
+        await page.evaluate(function (selector, text, caseSensitive) {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             if(!caseSensitive) {
@@ -208,7 +208,7 @@ const self = module.exports = {
                 }
             }
 
-        }, selector, text);
+        }, selector, text, caseSensitive);
 
         await tools.delay(delayAfterClick);
         if (selectorToFindAfterClick != null) {
