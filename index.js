@@ -105,19 +105,28 @@ const self = module.exports = {
      * will set text to an element
      * @param page -> the current page
      * @param selector -> the selector to write upon. For example: input[id="username"]
+     * @param text -> the text you wish to write
+     * @param delayAfter -> the delay after the type
+     * @param typeDelay -> the delay between each written letter
+     * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
+     */
+    setTextToSelector: async function (page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
+        await mSetText(page, null, selector, text, delayAfter, typeDelay, clearTextBefore)
+    },
+
+    /**
+     * will set text to an element
+     * @param page -> the current page
      * @param element -> optional element you want to write upon
      * @param text -> the text you wish to write
      * @param delayAfter -> the delay after the type
      * @param typeDelay -> the delay between each written letter
      * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
      */
-    setText: async function (page, selector, element=null, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
-        if (clearTextBefore) {
-            await self.clearText(page, selector, null, 500)
-        }
-        await page.type(selector, text, {delay: typeDelay});
-        await tools.delay(delayAfter)
+    setTextToElement: async function (page, element, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
+        await mSetText(page, element, null, text, delayAfter, typeDelay, clearTextBefore)
     },
+
 
     /**
      * will read text from an element
@@ -177,7 +186,7 @@ const self = module.exports = {
 
 
     /**
-     * will clear text from an element
+     * will clear text from selector or element
      */
     clearText: async function (page, selector, element=null, delayAfter = 0) {
         // await page.evaluate(function (selector) {
@@ -348,4 +357,16 @@ async function mClick(page,
     if (selectorToFindAfterClick != null) {
         await self.waitForSelector(page, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
     }
+}
+
+async function mSetText(page, element = null, selector = null, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
+    if (clearTextBefore) {
+        await self.clearText(page, selector, element, 500)
+    }
+    if(selector !== null) {
+        await page.type(selector, text, {delay: typeDelay});
+    } else {
+        await element.type(text)
+    }
+    await tools.delay(delayAfter)
 }
