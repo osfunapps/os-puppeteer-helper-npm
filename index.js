@@ -53,6 +53,20 @@ const self = module.exports = {
     },
 
     /**
+     * will wait for an element with a text to appear.
+     * @param page -> the puppeteer page
+     * @param selector -> the selector to search for
+     * @param text -> the text you wait for to appear
+     * @param timeout -> 0 to disable timeout
+     * @param delayAfterFound -> how long to wait after found
+     */
+    waitForSelectorWithText: async function (page, selector, text, timeout = null, delayAfterFound = 1500) {
+        await page.waitForFunction(
+            'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: timeout});
+        await tools.delay(delayAfterFound)
+    },
+
+    /**
      * will wait for an element to be removed from the dom
      * @param page -> the page
      * @param selector -> the selector to be removed
@@ -62,7 +76,7 @@ const self = module.exports = {
     waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000, disappearFor = 1000) {
         while (true) {
             try {
-                await self.waitForSelector(page, selector, disappearFor, 0)
+                await self.waitForSelector(page, selector, disappearFor, 0);
                 await tools.delay(checkEach);
             } catch (error) {
                 return
@@ -104,7 +118,7 @@ const self = module.exports = {
     readText: async function (page, selector, delayAfter = 0) {
         const element = await page.$(selector);
         const text = await (await element.getProperty('innerText')).jsonValue();
-        await tools.delay(delayAfter)
+        await tools.delay(delayAfter);
         return text
     },
 
