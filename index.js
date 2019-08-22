@@ -106,7 +106,7 @@ const self = module.exports = {
      */
     setText: async function (page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
         if (clearTextBefore) {
-            await self.clearText(page, selector, 500)
+            await self.clearText(page, selector, null, 500)
         }
         await page.type(selector, text, {delay: typeDelay});
         await tools.delay(delayAfter)
@@ -172,11 +172,17 @@ const self = module.exports = {
     /**
      * will clear text from an element
      */
-    clearText: async function (page, selector, delayAfter = 0) {
-        await page.evaluate(function (selector) {
-            // this code has now has access to foo
-            document.querySelector(selector).value = "";
-        }, selector);
+    clearText: async function (page, selector, element=null, delayAfter = 0) {
+        // await page.evaluate(function (selector) {
+        //     // this code has now has access to foo
+        //     document.querySelector(selector).value = "";
+        // }, selector);
+        let ele = element;
+        if(ele === null) {
+            ele = await self.getElement(page, selector)
+        }
+        await ele.click({ clickCount: 3 })
+        await ele.type("");
         await tools.delay(delayAfter)
     },
 
@@ -300,14 +306,6 @@ const self = module.exports = {
     getInnerHTML: async function (page, element) {
         return await page.evaluate(e => e.innerHTML, element);
     },
-
-    /**
-     * will return the inner html of an element
-     */
-    getTextContent: async function (page, element) {
-        return await page.evaluate(e => e.textContent, element);
-    },
-
 
     /**
      * will return an attribute value from an element
