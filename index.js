@@ -102,9 +102,16 @@ const self = module.exports = {
 
 
     /**
-     * will add text to an element
+     * will set text to an element
+     * @param page -> the current page
+     * @param selector -> the selector to write upon. For example: input[id="username"]
+     * @param element -> optional element you want to write upon
+     * @param text -> the text you wish to write
+     * @param delayAfter -> the delay after the type
+     * @param typeDelay -> the delay between each written letter
+     * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
      */
-    setText: async function (page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
+    setText: async function (page, selector, element=null, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
         if (clearTextBefore) {
             await self.clearText(page, selector, null, 500)
         }
