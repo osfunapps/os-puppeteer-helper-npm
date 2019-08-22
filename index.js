@@ -54,12 +54,16 @@ const self = module.exports = {
 
     /**
      * will wait for an element to be removed from the dom
+     * @param page -> the page
+     * @param selector -> the selector to be removed
+     * @param checkEach -> search every x millis for the selector
+     * @param disappearFor -> the selector should disappear for x millis
      */
-    waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000) {
+    waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000, disappearFor = 1000) {
         while (true) {
             try {
+                await self.waitForSelector(page, selector, disappearFor, 0)
                 await tools.delay(checkEach);
-                await self.waitForSelector(page, selector, null, 0)
             } catch (error) {
                 return
             }
@@ -225,13 +229,10 @@ const self = module.exports = {
     },
 
     /**
-     * will return element/s from the dom
+     * will return element from the dom/other element
      */
-    getElementsFromElement: async function (element, attName) {
-        let children =  await (await element.getProperty('selector')).jsonValue();
-        let firstChild = children[0]
-        let dVal = await self.getAttributeValueFromElement(firstChild, 'd')
-
+    getElement: async function (element, elementToFind) {
+        return await element.$(elementToFind);
     },
 
     /**
