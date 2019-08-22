@@ -199,15 +199,15 @@ const self = module.exports = {
         await page.evaluate(function (selector, text, caseSensitive) {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
-            if(!caseSensitive) {
+            if (!caseSensitive) {
                 text = text.toLowerCase()
             }
             for (let i = 0; i < allEle.length; i++) {
                 let eleText = allEle[i].innerText;
-                if(!caseSensitive) {
+                if (!caseSensitive) {
                     eleText = eleText.toLowerCase()
                 }
-                if (eleText.includes(text)){
+                if (eleText.includes(text)) {
                     allEle[i].click()
                 }
             }
@@ -231,9 +231,55 @@ const self = module.exports = {
     /**
      * will return element from the dom/other element
      */
-    getElement: async function (element, elementToFind) {
-        return await element.$(elementToFind);
+    getElement: async function (pageOrElement, cssQeury) {
+        return await pageOrElement.$(cssQeury);
     },
+
+    /**
+     * will return the next sibling element from another element
+     */
+    getNextSibling: async function (page, element) {
+        return await page.evaluateHandle(el => el.nextElementSibling, element);
+    },
+
+    /**
+     * will return the previous sibling element from another element
+     */
+    getPreviousSibling: async function (page, element) {
+        return await page.evaluateHandle(el => el.previousElementSibling, element);
+    },
+
+    /**
+     * will return the parent of an element
+     */
+    getParent: async function (page, element) {
+        return await page.evaluateHandle(el => el.parentElement, element);
+    },
+
+
+    /**
+     * will return the sibling of an element
+     */
+    getOnlyDirectChildren: async function (page, element) {
+
+        var children = page.evaluateHandle(el => el.children, element)
+    },
+
+
+    /**
+     * will return the inner html of an element
+     */
+    getInnerHTML: async function (page, element) {
+        return await page.evaluate(e => e.innerHTML, element);
+    },
+
+    /**
+     * will return the inner html of an element
+     */
+    getTextContent: async function (page, element) {
+        return await page.evaluate(e => e.textContent, element);
+    },
+
 
     /**
      * will return an attribute value from an element
