@@ -109,7 +109,7 @@ const self = module.exports = {
     },
 
     /**
-     * will click a selector
+     * will click an element/selector
      * @param page -> the current page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
      * @param delayAfterClick -> optional delay after click
@@ -117,19 +117,33 @@ const self = module.exports = {
      * @param howLongToWaitForSelector -> optional time to look for the element after click
      * @param delayAfterSelectorFound ->  optional delay after element found
      */
-    click: async function (page,
-                           selector,
-                           delayAfterClick = 0,
-                           selectorToFindAfterClick = null,
-                           howLongToWaitForSelector = null,
-                           delayAfterSelectorFound = 1500) {
-
-        await page.click(selector);
-        await tools.delay(delayAfterClick);
-        if (selectorToFindAfterClick != null) {
-            await self.waitForSelector(page, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
-        }
+    clickOnSelector: async function (page,
+                                     selector,
+                                     delayAfterClick = 0,
+                                     selectorToFindAfterClick = null,
+                                     howLongToWaitForSelector = null,
+                                     delayAfterSelectorFound = 1500) {
+        await mClick(page, selector, null, delayAfterClick, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
     },
+
+    /**
+     * will click an element/selector
+     * @param page -> the current page
+     * @param element -> the element to click upon
+     * @param delayAfterClick -> optional delay after click
+     * @param selectorToFindAfterClick -> optional element to look for after click
+     * @param howLongToWaitForSelector -> optional time to look for the element after click
+     * @param delayAfterSelectorFound ->  optional delay after element found
+     */
+    clickOnElement: async function (page,
+                                    element,
+                                    delayAfterClick = 0,
+                                    selectorToFindAfterClick = null,
+                                    howLongToWaitForSelector = null,
+                                    delayAfterSelectorFound = 1500) {
+        await mClick(page, null, element, delayAfterClick, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
+    },
+
 
     /**
      * Will selectByValue an element based on it's value
@@ -231,8 +245,8 @@ const self = module.exports = {
     /**
      * will return element from the dom/other element
      */
-    getElement: async function (pageOrElement, cssQeury) {
-        return await pageOrElement.$(cssQeury);
+    getElement: async function (pageOrElement, selector) {
+        return await pageOrElement.$(selector);
     },
 
     /**
@@ -298,3 +312,21 @@ const self = module.exports = {
 
 };
 
+async function mClick(page,
+                      btnSelector = null,
+                      btnElement = null,
+                      delayAfterClick = 0,
+                      selectorToFindAfterClick = null,
+                      howLongToWaitForSelector = null,
+                      delayAfterSelectorFound = 1500) {
+
+    if (btnElement !== null) {
+        await btnElement.click()
+    } else {
+        await page.click(btnSelector);
+    }
+    await tools.delay(delayAfterClick);
+    if (selectorToFindAfterClick != null) {
+        await self.waitForSelector(page, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
+    }
+}
