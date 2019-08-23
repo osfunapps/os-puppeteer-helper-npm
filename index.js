@@ -57,17 +57,26 @@ const self = module.exports = {
      * @param page -> the puppeteer page
      * @param selector -> the selector to search for
      * @param text -> the text you wait for to appear
+     * @param timeout -> optional timeout
      * @param checkEach -> tracker search time
      * @param delayAfterFound -> the delay after found
+     * @return boolean -> true if found, false otherwise
      */
-    waitForSelectorWithText: async function (page, selector, text, checkEach=2000, delayAfterFound=0) {
+    waitForSelectorWithText: async function (page, selector, text, checkEach=2000, timeout=null, delayAfterFound=0) {
+        let initialTime = new Date().getTime();
+        let futureTime = null;
+        if(timeout !== null) {
+            futureTime = initialTime + timeout;
+        }
         while (true) {
             try {
+                if(new Date().getTime() >= futureTime){
+                    return false
+                }
                 await page.waitForFunction(
                     'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: 1000});
-
                 await tools.delay(delayAfterFound);
-                return
+                return true
             } catch (error) {
                 await tools.delay(checkEach);
                 console.log("didn't found yet!")
@@ -206,7 +215,7 @@ const self = module.exports = {
         if (ele === null) {
             ele = await self.getElement(page, selector)
         }
-        await ele.click({clickCount: 3})
+        await ele.click({clickCount: 3});
         await ele.type("");
         await tools.delay(delayAfter)
     },
@@ -255,7 +264,7 @@ const self = module.exports = {
                                                 selectorToFindAfterClick = null,
                                                 howLongToWaitForSelector = null,
                                                 delayAfterSelectorFound = 1500) {
-        var ele = await self.getElementByText(page, selector, text, caseSensitive)
+        var ele = await self.getElementByText(page, selector, text, caseSensitive);
         await self.clickOnElement(page, ele, delayAfterClick, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
     },
 
