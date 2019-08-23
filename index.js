@@ -60,13 +60,23 @@ const self = module.exports = {
      * @param timeout -> optional timeout
      * @param checkEach -> tracker search time
      * @param delayAfterFound -> the delay after found
+     * @param caseSensitive -> true for exact text match false, ignore capitals etc...
      * @return boolean -> true if found, false otherwise
      */
-    waitForSelectorWithText: async function (page, selector, text, checkEach=2000, timeout=null, delayAfterFound=0) {
+    waitForSelectorWithText: async function (page,
+                                             selector,
+                                             text,
+                                             checkEach=2000,
+                                             timeout=null,
+                                             delayAfterFound=0,
+                                             caseSensitive=false) {
         let initialTime = new Date().getTime();
         let futureTime = null;
         if(timeout !== null) {
             futureTime = initialTime + timeout;
+        }
+        if(!caseSensitive) {
+            text = text.toLowerCase();
         }
         while (true) {
             try {
@@ -74,8 +84,11 @@ const self = module.exports = {
                     console.log("times up! returning")
                     return false
                 }
-                await page.waitForFunction(
-                    'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: 1000});
+                var waitFun = 'document.querySelector("' + selector + '").innerText.includes("' + text + '")'
+                if(!caseSensitive) {
+                    waitFun = 'document.querySelector("' + selector + '").innerText.toLowerCase().includes("' + text + '")'
+                }
+                await page.waitForFunction(waitFun, {timeout: 1000});
                 await tools.delay(delayAfterFound);
                 console.log("found it!")
                 return true
