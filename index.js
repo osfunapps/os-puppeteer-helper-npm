@@ -70,7 +70,7 @@ const self = module.exports = {
         }
         while (true) {
             try {
-                if(new Date().getTime() >= futureTime){
+                if(futureTime !== null && new Date().getTime() >= futureTime){
                     return false
                 }
                 await page.waitForFunction(
