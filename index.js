@@ -71,11 +71,13 @@ const self = module.exports = {
         while (true) {
             try {
                 if(futureTime !== null && new Date().getTime() >= futureTime){
+                    console.log("times up! returning")
                     return false
                 }
                 await page.waitForFunction(
                     'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: 1000});
                 await tools.delay(delayAfterFound);
+                console.log("found it!")
                 return true
             } catch (error) {
                 await tools.delay(checkEach);
