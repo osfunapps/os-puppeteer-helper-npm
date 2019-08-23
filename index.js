@@ -188,16 +188,16 @@ const self = module.exports = {
     /**
      * will clear text from selector or element
      */
-    clearText: async function (page, selector, element=null, delayAfter = 0) {
+    clearText: async function (page, selector, element = null, delayAfter = 0) {
         // await page.evaluate(function (selector) {
         //     // this code has now has access to foo
         //     document.querySelector(selector).value = "";
         // }, selector);
         let ele = element;
-        if(ele === null) {
+        if (ele === null) {
             ele = await self.getElement(page, selector)
         }
-        await ele.click({ clickCount: 3 })
+        await ele.click({clickCount: 3})
         await ele.type("");
         await tools.delay(delayAfter)
     },
@@ -246,7 +246,27 @@ const self = module.exports = {
                                                 selectorToFindAfterClick = null,
                                                 howLongToWaitForSelector = null,
                                                 delayAfterSelectorFound = 1500) {
-        await page.evaluate(function (selector, text, caseSensitive) {
+        var ele = await self.getElementByText(page, selector, text, caseSensitive)
+        await self.clickOnElement(page, ele, delayAfterClick, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
+    },
+
+
+    /**
+     * will return an element contains text
+     * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
+     * @param page -> the puppeteer page
+     * @param selector -> the selector to find. For example: a:nth-of-type(2)
+     * @param text -> the element's innerText
+     * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
+     */
+    getElementByText: async function (page,
+                                      selector,
+                                      text,
+                                      caseSensitive = false) {
+
+
+        // TODO: need to fix this function!! need to return an element by it's text!!!!
+        return await page.evaluateHandle((selector, text, caseSensitive) => {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             if (!caseSensitive) {
@@ -258,16 +278,12 @@ const self = module.exports = {
                     eleText = eleText.toLowerCase()
                 }
                 if (eleText.includes(text)) {
-                    allEle[i].click()
+                    return allEle[i]
                 }
             }
 
         }, selector, text, caseSensitive);
 
-        await tools.delay(delayAfterClick);
-        if (selectorToFindAfterClick != null) {
-            await self.waitForSelector(page, selectorToFindAfterClick, howLongToWaitForSelector, delayAfterSelectorFound)
-        }
     },
 
 
@@ -363,7 +379,7 @@ async function mSetText(page, element = null, selector = null, text, delayAfter 
     if (clearTextBefore) {
         await self.clearText(page, selector, element, 500)
     }
-    if(selector !== null) {
+    if (selector !== null) {
         await page.type(selector, text, {delay: typeDelay});
     } else {
         await element.type(text)
