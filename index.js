@@ -46,10 +46,17 @@ const self = module.exports = {
      * @param selector -> the selector to search for
      * @param timeout -> 0 to disable timeout
      * @param delayAfterFound -> how long to wait after found
+     * @return ElementHandle -> the element, if found, else, undefined
      */
     waitForSelector: async function (page, selector, timeout = null, delayAfterFound = 1500) {
-        await page.waitForSelector(selector, {timeout: timeout});
+        let ele = undefined;
+        try {
+            ele = await page.waitForSelector(selector, {timeout: timeout});
+        } catch {
+
+        }
         await tools.delay(delayAfterFound)
+        return ele
     },
 
     /**
@@ -61,7 +68,7 @@ const self = module.exports = {
      * @param checkEach -> tracker search time
      * @param delayAfterFound -> the delay after found
      * @param caseSensitive -> true for exact text match false, ignore capitals etc...
-     * @return boolean -> true if found, false otherwise
+     * @return elmentHandle -> the element if found, else undefined
      */
     waitForSelectorWithText: async function (page,
                                              selector,
@@ -70,6 +77,7 @@ const self = module.exports = {
                                              timeout=null,
                                              delayAfterFound=0,
                                              caseSensitive=false) {
+
         let initialTime = new Date().getTime();
         let futureTime = null;
         if(timeout !== null) {
@@ -78,24 +86,22 @@ const self = module.exports = {
         if(!caseSensitive) {
             text = text.toLowerCase();
         }
+
         while (true) {
-            try {
-                if(futureTime !== null && new Date().getTime() >= futureTime){
-                    console.log("times up! returning")
-                    return false
-                }
-                var waitFun = 'document.querySelector("' + selector + '").innerText.includes("' + text + '")'
-                if(!caseSensitive) {
-                    waitFun = 'document.querySelector("' + selector + '").innerText.toLowerCase().includes("' + text + '")'
-                }
-                await page.waitForFunction(waitFun, {timeout: 1000});
-                await tools.delay(delayAfterFound);
-                console.log("found it!")
-                return true
-            } catch (error) {
-                await tools.delay(checkEach);
-                console.log("didn't found yet!")
+            if (futureTime !== null && new Date().getTime() >= futureTime) {
+                console.log("times up! returning")
+                return undefined
             }
+
+            var ele = await self.getElementByText(page, selector, text, caseSensitive)
+            if(ele !== undefined){
+                console.log("found it!")
+                await tools.delay(delayAfterFound);
+                return ele
+            }
+
+            console.log("didn't found yet!")
+            await tools.delay(checkEach);
         }
     },
 
@@ -107,13 +113,12 @@ const self = module.exports = {
      * @param disappearFor -> the selector should disappear for x millis
      */
     waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000, disappearFor = 1000) {
-        while (true) {
-            try {
-                await self.waitForSelector(page, selector, disappearFor, 0);
-                await tools.delay(checkEach);
-            } catch (error) {
+        while(true) {
+            let found = await self.waitForSelector(page, selector, disappearFor, 0);
+            if(!found) {
                 return
             }
+            await tools.delay(checkEach);
         }
     },
 
@@ -297,9 +302,7 @@ const self = module.exports = {
                                       text,
                                       caseSensitive = false) {
 
-
-        // TODO: need to fix this function!! need to return an element by it's text!!!!
-        return await page.evaluateHandle((selector, text, caseSensitive) => {
+        let ele =  await page.evaluateHandle((selector, text, caseSensitive) => {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             if (!caseSensitive) {
@@ -314,9 +317,11 @@ const self = module.exports = {
                     return allEle[i]
                 }
             }
+            return undefined
 
         }, selector, text, caseSensitive);
 
+        return ele.type === undefined? undefined : ele
     },
 
 
@@ -373,6 +378,13 @@ const self = module.exports = {
     },
 
     /**
+     * will return the inner text of an element
+     */
+    getInnerText: async function (page, element) {
+        return await page.evaluate(e => e.innerText, element);
+    },
+
+    /**
      * will return an attribute value from an element
      */
     getAttributeValueFromElement: async function (element, attName) {
@@ -418,4 +430,11 @@ async function mSetText(page, element = null, selector = null, text, delayAfter 
         await element.type(text)
     }
     await tools.delay(delayAfter)
+}
+
+function describe(jsHandle) {
+    return jsHandle.executionContext().evaluate(obj => {
+        // serialize |obj| however you want
+        return 'beautiful object of type ' + (typeof obj);
+    }, jsHandle);
 }
