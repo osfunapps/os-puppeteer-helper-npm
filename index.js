@@ -57,13 +57,22 @@ const self = module.exports = {
      * @param page -> the puppeteer page
      * @param selector -> the selector to search for
      * @param text -> the text you wait for to appear
-     * @param timeout -> 0 to disable timeout
-     * @param delayAfterFound -> how long to wait after found
+     * @param checkEach -> tracker search time
+     * @param delayAfterFound -> the delay after found
      */
-    waitForSelectorWithText: async function (page, selector, text, timeout = null, delayAfterFound = 1500) {
-        await page.waitForFunction(
-            'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: timeout});
-        await tools.delay(delayAfterFound)
+    waitForSelectorWithText: async function (page, selector, text, checkEach=2000, delayAfterFound=0) {
+        while (true) {
+            try {
+                await page.waitForFunction(
+                    'document.querySelector("' + selector + '").innerText.includes("' + text + '")', {timeout: 1000});
+
+                await tools.delay(delayAfterFound);
+                return
+            } catch (error) {
+                await tools.delay(checkEach);
+                console.log("didn't found yet!")
+            }
+        }
     },
 
     /**
