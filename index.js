@@ -261,7 +261,7 @@ const self = module.exports = {
             behavior: 'allow',
             downloadPath: path
         });
-        await self.click(page, downloadSelector)
+        await self.clickOnSelector(page, downloadSelector)
     },
 
     /**
