@@ -11,7 +11,7 @@ const self = module.exports = {
      * @param width -> browser width
      * @param height -> browser height
      */
-    createBrowser: async function (url, slowMo = 5, headless = false, width = 1300, height = 768) {
+    createBrowser: async function (url="about:blank", slowMo = 5, headless = false, width = 1300, height = 768) {
         const browser = await puppeteer.launch({
             headless: headless,
             slowMo: slowMo // slow down by 5
@@ -251,17 +251,23 @@ const self = module.exports = {
     },
 
     /**
-     * will download a file
+     * Will download a file.
+     * Notice: the file will be downloaded to a temp directory and then will be moved to the output
+     * path. It means that there will be a small delay at the end of the download, just to make sure
+     * the file system will finish moving the file (there is no callback to this yet)
      * @param page -> the puppeteer page
      * @param path -> the path to the file
      * @param downloadSelector -> the selector to click in order to start the download
+     * @param systemCopyDelay -> the time it will take the file system to copy the file to the new
+     * output dir (consider using a higher value for large files)
      */
-    downloadFile: async function (page, path, downloadSelector) {
+    downloadFile: async function (page, path, downloadSelector, systemCopyDelay=5000) {
         await page._client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
             downloadPath: path
         });
         await self.clickOnSelector(page, downloadSelector)
+        await tools.delay(systemCopyDelay)
     },
 
     /**
@@ -398,6 +404,16 @@ const self = module.exports = {
         return await (await element.getProperty('innerHTML')).jsonValue();
     },
 
+    /**
+     * will kill the browser
+     */
+    close: async function (browser) {
+        try {
+            await browser.close()
+        } catch (e) {
+
+        }
+    },
 
 };
 
