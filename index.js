@@ -4,7 +4,8 @@ const tools = require('os-tools');
 const self = module.exports = {
 
     /**
-     * will create a new chromium browser
+     * Will create a new chromium browser
+     *
      * @param url -> the url to log in to
      * @param slowMo -> how long to wait before each command
      * @param headless -> show/hide browser
@@ -24,7 +25,7 @@ const self = module.exports = {
     },
 
     /**
-     * will navigate to a certain url with an option to search for a selector after page load
+     * Will navigate to a certain url with an option to search for a selector after page load
      */
     navigateTo: async function (page,
                                 url,
@@ -41,7 +42,8 @@ const self = module.exports = {
     },
 
     /**
-     * will wait for an element to appear.
+     * Will wait for an element to appear.
+     *
      * @param page -> the puppeteer page
      * @param selector -> the selector to search for
      * @param timeout -> 0 to disable timeout
@@ -60,7 +62,8 @@ const self = module.exports = {
     },
 
     /**
-     * will wait for an element with a text to appear.
+     * Will wait for an element with a text to appear.
+     *
      * @param page -> the puppeteer page
      * @param selector -> the selector to search for
      * @param text -> the text you wait for to appear
@@ -106,7 +109,8 @@ const self = module.exports = {
     },
 
     /**
-     * will wait for an element to be removed from the dom
+     * Will wait for an element to be removed from the dom
+     *
      * @param page -> the page
      * @param selector -> the selector to be removed
      * @param checkEach -> search every x millis for the selector
@@ -123,7 +127,7 @@ const self = module.exports = {
     },
 
     /**
-     * will wait for an elements to appear
+     * Will wait for an elements to appear
      */
     waitForSelectors: async function (page, timeout = null, delayAfterFound = 1500, ...selectors) {
         await page.waitForSelector(selectors, {timeout: timeout});
@@ -132,7 +136,7 @@ const self = module.exports = {
 
 
     /**
-     * will wait for navigation to change
+     * Will wait for navigation to change
      */
     waitForNavigation: async function (page, selector, timeout = null) {
         return await page.waitForNavigation(selector, {timeout: timeout});
@@ -140,7 +144,8 @@ const self = module.exports = {
 
 
     /**
-     * will set text to an element
+     * Will set text to an element
+     *
      * @param page -> the current page
      * @param selector -> the selector to write upon. For example: input[id="username"]
      * @param text -> the text you wish to write
@@ -153,7 +158,8 @@ const self = module.exports = {
     },
 
     /**
-     * will set text to an element
+     * Will set text to an element
+     *
      * @param page -> the current page
      * @param element -> optional element you want to write upon
      * @param text -> the text you wish to write
@@ -167,7 +173,7 @@ const self = module.exports = {
 
 
     /**
-     * will read text from an element
+     * Will read text from an element
      */
     readText: async function (page, selector, delayAfter = 0) {
         const element = await page.$(selector);
@@ -177,7 +183,8 @@ const self = module.exports = {
     },
 
     /**
-     * will click an element/selector
+     * Will click an element/selector
+     *
      * @param page -> the current page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
      * @param delayAfterClick -> optional delay after click
@@ -195,7 +202,8 @@ const self = module.exports = {
     },
 
     /**
-     * will click an element/selector
+     * Will click an element/selector
+     *
      * @param page -> the current page
      * @param element -> the element to click upon
      * @param delayAfterClick -> optional delay after click
@@ -224,7 +232,7 @@ const self = module.exports = {
 
 
     /**
-     * will clear text from selector or element
+     * Will clear text from selector or element
      */
     clearText: async function (page, selector, element = null, delayAfter = 0) {
         // await page.evaluate(function (selector) {
@@ -241,7 +249,7 @@ const self = module.exports = {
     },
 
     /**
-     * will create a count down (10 9 8 ...)
+     * Will create a count down (10 9 8 ...)
      */
     makeCountDown: async function (from) {
         for (let i = from; i > 0; i--) {
@@ -251,8 +259,9 @@ const self = module.exports = {
     },
 
     /**
-     * will download a file.
+     * Will download a file.
      * NOTICE: if you only want to change the saving location of a file, call setDownloadedFilesLocation(output).
+     *
      * @param page -> the puppeteer page
      * @param outputPath -> the path to the downloaded file
      * @param downloadSelector -> the selector to click in order to start the download
@@ -273,8 +282,9 @@ const self = module.exports = {
     },
 
     /**
-     * will click on an element which contains text
+     * Will click on an element which contains text
      * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
+     *
      * @param page -> the puppeteer page
      * @param selector -> the selector to click. For example: a:nth-of-type(2)
      * @param text -> the element's innerText
@@ -298,8 +308,9 @@ const self = module.exports = {
 
 
     /**
-     * will return an element contains text
+     * Will return an element contains text
      * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
+     *
      * @param page -> the puppeteer page
      * @param selector -> the selector to find. For example: a:nth-of-type(2)
      * @param text -> the element's innerText
@@ -334,7 +345,7 @@ const self = module.exports = {
 
 
     /**
-     * will return element/s from the dom
+     * Will return element/s from the dom
      */
     getElements: async function (page, selector) {
         return await page.$$(selector);
@@ -353,21 +364,21 @@ const self = module.exports = {
     },
 
     /**
-     * will return the next sibling element from another element
+     * Will return the next sibling element from another element
      */
     getNextSibling: async function (page, element) {
         return await page.evaluateHandle(el => el.nextElementSibling, element);
     },
 
     /**
-     * will return the previous sibling element from another element
+     * Will return the previous sibling element from another element
      */
     getPreviousSibling: async function (page, element) {
         return await page.evaluateHandle(el => el.previousElementSibling, element);
     },
 
     /**
-     * will return the parent of an element
+     * Will return the parent of an element
      */
     getParent: async function (page, element) {
         return await page.evaluateHandle(el => el.parentElement, element);
@@ -375,7 +386,7 @@ const self = module.exports = {
 
 
     /**
-     * will return the sibling of an element
+     * Will return the sibling of an element
      */
     getOnlyDirectChildren: async function (page, element) {
 
@@ -384,35 +395,35 @@ const self = module.exports = {
 
 
     /**
-     * will return the inner html of an element
+     * Will return the inner html of an element
      */
     getInnerHTML: async function (page, element) {
         return await page.evaluate(e => e.innerHTML, element);
     },
 
     /**
-     * will return the inner text of an element
+     * Will return the inner text of an element
      */
     getInnerText: async function (page, element) {
         return await page.evaluate(e => e.innerText, element);
     },
 
     /**
-     * will return an attribute value from an element
+     * Will return an attribute value from an element
      */
     getAttributeValueFromElement: async function (element, attName) {
         return await (await element.getProperty(attName)).jsonValue();
     },
 
     /**
-     * will return the inner html of an element
+     * Will return the inner html of an element
      */
     getInnerHTMLFromElement: async function (element) {
         return await (await element.getProperty('innerHTML')).jsonValue();
     },
 
     /**
-     * will kill the browser
+     * Will kill the browser
      */
     close: async function (browser) {
         try {

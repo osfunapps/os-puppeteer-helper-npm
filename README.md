@@ -30,11 +30,11 @@ Navigate to a page:
                                                                                 delayAfterNavigated = 0) {
 Insert text by selectors:
 
-    await ph.setText(page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true)
+    await ph.setTextToSelector(page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true)
                            
 Click and wait for selector:
         
-    await ph.click(page, selector, delayAfterClick = 0, selectorToFindAfterClick = null, howLongToWaitForSelector = 240000, delayAfterSelectorFound = 1500) 
+    await ph.clickOnSelector(page, selector, delayAfterClick = 0, selectorToFindAfterClick = null, howLongToWaitForSelector = 240000, delayAfterSelectorFound = 1500) 
       
 Wait for selector to be removed from the dom:
     
