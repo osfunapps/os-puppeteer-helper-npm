@@ -1,6 +1,6 @@
 {
   "name": "os-puppeteer-helper",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "an intuitive module to help with puppeteer related functions",
   "main": "index.js",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "https://github.com/osfunapps/os-puppeteer-helper-npm"
   },
   "dependencies": {
-    "os-tools": "1.0.2",
+    "os-tools": "^1.1.6",
     "puppeteer": "^1.18.0"
   },
   "keywords": [
