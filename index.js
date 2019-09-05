@@ -251,23 +251,25 @@ const self = module.exports = {
     },
 
     /**
-     * Will download a file.
-     * Notice: the file will be downloaded to a temp directory and then will be moved to the output
-     * path. It means that there will be a small delay at the end of the download, just to make sure
-     * the file system will finish moving the file (there is no callback to this yet)
+     * will download a file.
+     * NOTICE: if you only want to change the saving location of a file, call setDownloadedFilesLocation(output).
      * @param page -> the puppeteer page
-     * @param path -> the path to the file
+     * @param outputPath -> the path to the downloaded file
      * @param downloadSelector -> the selector to click in order to start the download
-     * @param systemCopyDelay -> the time it will take the file system to copy the file to the new
-     * output dir (consider using a higher value for large files)
      */
-    downloadFile: async function (page, path, downloadSelector, systemCopyDelay=5000) {
+    downloadFile: async function (page, outputPath, downloadSelector) {
+        self.setDownloadedFilesLocation(page, outputPath)
+        await self.clickOnSelector(page, downloadSelector)
+    },
+
+    /**
+     * will set the location to which the downloaded files will be saved
+     */
+    setDownloadedFilesLocation: async function (page, outputPath) {
         await page._client.send('Page.setDownloadBehavior', {
             behavior: 'allow',
-            downloadPath: path
+            downloadPath: outputPath
         });
-        await self.clickOnSelector(page, downloadSelector)
-        await tools.delay(systemCopyDelay)
     },
 
     /**
@@ -339,10 +341,15 @@ const self = module.exports = {
     },
 
     /**
-     * will return element from the dom/other element
+     * Will return element from the dom/other element.
+     * If no found, return undefined
      */
     getElement: async function (pageOrElement, selector) {
-        return await pageOrElement.$(selector);
+        try {
+            return await pageOrElement.$(selector);
+        } catch (e) {
+            return undefined
+        }
     },
 
     /**

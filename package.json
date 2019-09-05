@@ -1,6 +1,6 @@
 {
   "name": "os-puppeteer-helper",
-  "version": "1.2.4",
+  "version": "1.2.6",
   "description": "an intuitive module to help with puppeteer related functions",
   "main": "index.js",
   "repository": {
