@@ -12,7 +12,7 @@ const self = module.exports = {
      * @param width -> browser width
      * @param height -> browser height
      */
-    createBrowser: async function (url="about:blank", slowMo = 5, headless = false, width = 1300, height = 768) {
+    createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768) {
         const browser = await puppeteer.launch({
             headless: headless,
             slowMo: slowMo // slow down by 5
@@ -76,17 +76,17 @@ const self = module.exports = {
     waitForSelectorWithText: async function (page,
                                              selector,
                                              text,
-                                             checkEach=2000,
-                                             timeout=null,
-                                             delayAfterFound=0,
-                                             caseSensitive=false) {
+                                             checkEach = 2000,
+                                             timeout = null,
+                                             delayAfterFound = 0,
+                                             caseSensitive = false) {
 
         let initialTime = new Date().getTime();
         let futureTime = null;
-        if(timeout !== null) {
+        if (timeout !== null) {
             futureTime = initialTime + timeout;
         }
-        if(!caseSensitive) {
+        if (!caseSensitive) {
             text = text.toLowerCase();
         }
 
@@ -97,7 +97,7 @@ const self = module.exports = {
             }
 
             var ele = await self.getElementByText(page, selector, text, caseSensitive)
-            if(ele !== undefined){
+            if (ele !== undefined) {
                 console.log("found it!")
                 await tools.delay(delayAfterFound);
                 return ele
@@ -117,9 +117,9 @@ const self = module.exports = {
      * @param disappearFor -> the selector should disappear for x millis
      */
     waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000, disappearFor = 1000) {
-        while(true) {
+        while (true) {
             let found = await self.waitForSelector(page, selector, disappearFor, 0);
-            if(!found) {
+            if (!found) {
                 return
             }
             await tools.delay(checkEach);
@@ -315,13 +315,17 @@ const self = module.exports = {
      * @param selector -> the selector to find. For example: a:nth-of-type(2)
      * @param text -> the element's innerText
      * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
+     * @param includes -> set to true if the element contains text
+     * @param identical -> set to true if element has the EXACT text ( === )
      */
     getElementByText: async function (page,
                                       selector,
                                       text,
-                                      caseSensitive = false) {
+                                      caseSensitive = false,
+                                      includes = true,
+                                      identical = false) {
 
-        let ele =  await page.evaluateHandle((selector, text, caseSensitive) => {
+        let ele = await page.evaluateHandle((selector, text, caseSensitive, includes, identical) => {
             // this code has now has access to foo
             let allEle = document.querySelectorAll(selector);
             if (!caseSensitive) {
@@ -332,15 +336,23 @@ const self = module.exports = {
                 if (!caseSensitive) {
                     eleText = eleText.toLowerCase()
                 }
-                if (eleText.includes(text)) {
-                    return allEle[i]
+                if (includes) {
+                    if (eleText.includes(text)) {
+                        return allEle[i]
+                    }
+                }
+
+                if (identical) {
+                    if (eleText === text) {
+                        return allEle[i]
+                    }
                 }
             }
             return undefined
 
-        }, selector, text, caseSensitive);
+        }, selector, text, caseSensitive, includes, identical);
 
-        return ele.type === undefined? undefined : ele
+        return ele.type === undefined ? undefined : ele
     },
 
 
@@ -367,21 +379,24 @@ const self = module.exports = {
      * Will return the next sibling element from another element
      */
     getNextSibling: async function (page, element) {
-        return await page.evaluateHandle(el => el.nextElementSibling, element);
+        let ele = await page.evaluateHandle(el => el.nextElementSibling, element);
+        return ele.type === undefined ? null : ele
     },
 
     /**
      * Will return the previous sibling element from another element
      */
     getPreviousSibling: async function (page, element) {
-        return await page.evaluateHandle(el => el.previousElementSibling, element);
+        let ele = await page.evaluateHandle(el => el.previousElementSibling, element);
+        return ele.type === undefined ? null : ele
     },
 
     /**
      * Will return the parent of an element
      */
     getParent: async function (page, element) {
-        return await page.evaluateHandle(el => el.parentElement, element);
+        let ele = await page.evaluateHandle(el => el.parentElement, element);
+        return ele.type === undefined ? null : ele
     },
 
 
@@ -389,8 +404,7 @@ const self = module.exports = {
      * Will return the sibling of an element
      */
     getOnlyDirectChildren: async function (page, element) {
-
-        var children = page.evaluateHandle(el => el.children, element)
+        return page.evaluateHandle(el => el.children, element)
     },
 
 
@@ -432,7 +446,6 @@ const self = module.exports = {
 
         }
     },
-
 };
 
 async function mClick(page,
