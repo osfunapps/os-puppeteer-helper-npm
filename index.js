@@ -10,14 +10,18 @@ const self = module.exports = {
          * @param headless -> show/hide browser
          * @param width -> browser width
          * @param height -> browser height
+         * @param googleSignIn -> if you gonna log in to any Google service, trigger to true to fix the login problem
          */
-        createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768) {
+        createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768, googleSignIn = false) {
             const browser = await require('puppeteer').launch({
                 headless: headless,
                 slowMo: slowMo // slow down by 5
             });
 
             const page = await browser.newPage();
+            if(googleSignIn) {
+                await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10136");
+            }
             await page.setViewport({width: width, height: height});
             await self.navigateTo(page, url);
             return [browser, page]

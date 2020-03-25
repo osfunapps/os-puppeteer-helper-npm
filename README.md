@@ -61,9 +61,10 @@ And a lot more!
          * @param headless -> show/hide browser
          * @param width -> browser width
          * @param height -> browser height
+         * @param googleSignIn -> if you gonna log in to any Google service, trigger to true to fix the login problem
          */
-        createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768)
-
+        createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768, googleSignIn = false) {
+        
         /**
          * Will create a new firefox browser
          *
