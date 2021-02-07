@@ -10,42 +10,58 @@ const self = module.exports = {
          * @param headless -> show/hide browser
          * @param width -> browser width
          * @param height -> browser height
-         * @param googleSignIn -> if you gonna log in to any Google service, trigger to true to fix the login problem
          */
-        createBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768, googleSignIn = false) {
+        createBrowser: async function (url = "about:blank",
+                                       slowMo = 5,
+                                       headless = false,
+                                       width = 1300,
+                                       height = 768) {
             const browser = await require('puppeteer').launch({
                 headless: headless,
                 slowMo: slowMo // slow down by 5
             });
 
             const page = await browser.newPage();
-            if(googleSignIn) {
-                await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10136");
-            }
             await page.setViewport({width: width, height: height});
             await self.navigateTo(page, url);
             return [browser, page]
         },
 
+
         /**
-         * Will create a new firefox browser
+         * Will create a new firefox browser. You should use this browser if you're planning to register to Google websites.
+         * NOTICE: you will need to install FireFox Nightly and supply your firefox execuatble file.
          *
-         * @param url -> the url to log in to
-         * @param slowMo -> how long to wait before each command
-         * @param headless -> show/hide browser
-         * @param width -> browser width
-         * @param height -> browser height
+         * @param url the url to log in to
+         * @param slowMo how long to wait before each command
+         * @param headless show/hide browser
+         * @param width browser width
+         * @param height browser height
+         * @param fireFoxNightlyPath the path to your FireFox Nightly runner file.
+         * In Windows that's usually your firefox.exe file (like 'C:/Program Files/Firefox Nightly/firefox.exe').
+         * In Mac that's usually your firefox file, located in your Firefox Nightly.app, inside the Applications dir.
          */
-        createFirefoxBrowser: async function (url = "about:blank", slowMo = 5, headless = false, width = 1300, height = 768) {
-            const browser = await require('puppeteer-firefox').launch({
+        createFirefoxBrowser: async function (url = "about:blank",
+                                              slowMo = 5,
+                                              headless = false,
+                                              width = 1300,
+                                              height = 768,
+                                              fireFoxNightlyPath = '/Applications/Firefox Nightly.app/Contents/MacOS/firefox') {
+            const browser = await require('puppeteer').launch({
                 headless: headless,
+                product: 'firefox',
+                args: [
+                    '-wait-for-browser'
+                ],
+                executablePath: fireFoxNightlyPath,
+                // userDataDir: 'C:/Users/Milen/Desktop/Puppeteer-Test_Firefox/Profile_FirefoxNightly',
                 slowMo: slowMo // slow down by 5
             });
 
             const page = await browser.newPage();
             await page.setViewport({width: width, height: height});
             await self.navigateTo(page, url);
-            return [browser, page]
+            return [browser, page];
         },
 
         /**
@@ -68,11 +84,11 @@ const self = module.exports = {
         /**
          * Will wait for an element to appear.
          *
-         * @param page -> the puppeteer page
-         * @param selector -> the selector to search for
-         * @param timeout -> 0 to disable timeout
-         * @param delayAfterFound -> how long to wait after found
-         * @return ElementHandle -> the element, if found, else, undefined
+         * @param page the puppeteer page
+         * @param selector the selector to search for
+         * @param timeout 0 to disable timeout
+         * @param delayAfterFound how long to wait after found
+         * @return ElementHandle the element, if found, else, undefined
          */
         waitForSelector: async function (page, selector, timeout = null, delayAfterFound = 1500) {
             let ele = undefined;
@@ -87,22 +103,28 @@ const self = module.exports = {
         /**
          * Will wait for an element with a text to appear.
          *
-         * @param page -> the puppeteer page
-         * @param selector -> the selector to search for
-         * @param text -> the text you wait for to appear
-         * @param timeout -> optional timeout
-         * @param checkEach -> tracker search time
-         * @param delayAfterFound -> the delay after found
-         * @param caseSensitive -> true for exact text match false, ignore capitals etc...
-         * @return elmentHandle -> the element if found, else undefined
+         * @param page the puppeteer page
+         * @param selector the selector to search for
+         * @param text the text you wait for to appear
+         * @param timeout optional timeout
+         * @param checkEach tracker search time
+         * @param delayAfterFound the delay after found
+         * @param caseSensitive true for exact text match false, ignore capitals etc...
+         * @param includes set to true if the element contains text
+         * @param identical set to true if element has the EXACT text ( === )
+         * @param innerHTML set to true for innerHTML. False for innerText
+         * @return elmentHandle the element if found, else undefined
          */
         waitForSelectorWithText: async function (page,
                                                  selector,
                                                  text,
                                                  checkEach = 1000,
+                                                 caseSensitive = false,
+                                                 includes = true,
+                                                 identical = false,
+                                                 innerHTML = true,
                                                  timeout = null,
-                                                 delayAfterFound = 0,
-                                                 caseSensitive = false) {
+                                                 delayAfterFound = 0) {
 
             let initialTime = new Date().getTime();
             let futureTime = null;
@@ -123,7 +145,7 @@ const self = module.exports = {
                 if (found) {
                     let ele = undefined;
                     console.log('searching for text');
-                    ele = await self.getElementByText(page, selector, text, caseSensitive);
+                    ele = await self.getElementByText(page, selector, text, caseSensitive, includes, identical, innerHTML);
                     if (ele !== undefined) {
                         console.log("found it!");
                         await tools.delay(delayAfterFound);
@@ -139,10 +161,10 @@ const self = module.exports = {
         /**
          * Will wait for an element to be removed from the dom
          *
-         * @param page -> the page
-         * @param selector -> the selector to be removed
-         * @param checkEach -> search every x millis for the selector
-         * @param disappearFor -> the selector should disappear for x millis
+         * @param page the page
+         * @param selector the selector to be removed
+         * @param checkEach search every x millis for the selector
+         * @param disappearFor the selector should disappear for x millis
          */
         waitForSelectorToBeRemoved: async function (page, selector, checkEach = 2000, disappearFor = 1000) {
             while (true) {
@@ -206,12 +228,12 @@ const self = module.exports = {
         /**
          * Will set text to a selector
          *
-         * @param page -> the current page
-         * @param selector -> the selector to write upon. For example: input[id="username"]
-         * @param text -> the text you wish to write
-         * @param delayAfter -> the delay after the type
-         * @param typeDelay -> the delay between each written letter
-         * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
+         * @param page the current page
+         * @param selector the selector to write upon. For example: input[id="username"]
+         * @param text the text you wish to write
+         * @param delayAfter the delay after the type
+         * @param typeDelay the delay between each written letter
+         * @param clearTextBefore set to true if you want to clear the text box before (manual clear)
          */
         setTextToSelector: async function (page, selector, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
             await mSetText(page, null, selector, text, delayAfter, typeDelay, clearTextBefore)
@@ -220,12 +242,12 @@ const self = module.exports = {
         /**
          * Will set text to xpath
          *
-         * @param page -> the current page
-         * @param element -> optional element you want to write upon
-         * @param text -> the text you wish to write
-         * @param delayAfter -> the delay after the type
-         * @param typeDelay -> the delay between each written letter
-         * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
+         * @param page the current page
+         * @param element optional element you want to write upon
+         * @param text the text you wish to write
+         * @param delayAfter the delay after the type
+         * @param typeDelay the delay between each written letter
+         * @param clearTextBefore set to true if you want to clear the text box before (manual clear)
          */
         setTextToXpath: async function (page, xpath, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
             let element = await self.getElementByXPath(page, xpath)
@@ -236,12 +258,12 @@ const self = module.exports = {
         /**
          * Will set text to an element
          *
-         * @param page -> the current page
-         * @param element -> optional element you want to write upon
-         * @param text -> the text you wish to write
-         * @param delayAfter -> the delay after the type
-         * @param typeDelay -> the delay between each written letter
-         * @param clearTextBefore -> set to true if you want to clear the text box before (manual clear)
+         * @param page the current page
+         * @param element optional element you want to write upon
+         * @param text the text you wish to write
+         * @param delayAfter the delay after the type
+         * @param typeDelay the delay between each written letter
+         * @param clearTextBefore set to true if you want to clear the text box before (manual clear)
          */
         setTextToElement: async function (page, element, text, delayAfter = 0, typeDelay = 20, clearTextBefore = true) {
             await mSetText(page, element, null, text, delayAfter, typeDelay, clearTextBefore)
@@ -251,10 +273,10 @@ const self = module.exports = {
         /**
          * Will type alpha/numerical on the keyboard
          *
-         * @param page -> the current page
-         * @param text -> the text to write
-         * @param delay -> the delay between letters
-         * @param delayAfter -> the delay after the whole type
+         * @param page the current page
+         * @param text the text to write
+         * @param delay the delay between letters
+         * @param delayAfter the delay after the whole type
          */
         typeOnKeyboard: async function (page, text, delay = 2, delayAfter = 0) {
             await page.keyboard.type(text, {delay: delay});
@@ -265,10 +287,10 @@ const self = module.exports = {
         /**
          * Will read text from selector
          *
-         * @param page -> the current page
-         * @param selector -> the selector to read
-         * @param innerText -> true for innerText, false for innerHTML
-         * @param delayAfter -> the delay after the whole type
+         * @param page the current page
+         * @param selector the selector to read
+         * @param innerText true for innerText, false for innerHTML
+         * @param delayAfter the delay after the whole type
          */
         readTextFromSelector: async function (page, selector, innerText = true, delayAfter = 0) {
             var property = innerText
@@ -284,12 +306,12 @@ const self = module.exports = {
         /**
          * Will click on a selector
          *
-         * @param page -> the current page
-         * @param selector -> the selector to click. For example: a:nth-of-type(2)
-         * @param delayAfterClick -> optional delay after click
-         * @param selectorToFindAfterClick -> optional element to look for after click
-         * @param howLongToWaitForSelector -> optional time to look for the element after click
-         * @param delayAfterSelectorFound ->  optional delay after element found
+         * @param page the current page
+         * @param selector the selector to click. For example: a:nth-of-type(2)
+         * @param delayAfterClick optional delay after click
+         * @param selectorToFindAfterClick optional element to look for after click
+         * @param howLongToWaitForSelector optional time to look for the element after click
+         * @param delayAfterSelectorFound  optional delay after element found
          */
         clickOnSelector: async function (page,
                                          selector,
@@ -303,12 +325,12 @@ const self = module.exports = {
         /**
          * Will click on a XPath selector
          *
-         * @param page -> the current page
-         * @param xpath -> the xpath to click. For example: /html/body/div[6]/div[1]/div[1]/h1
-         * @param delayAfterClick -> optional delay after click
-         * @param selectorToFindAfterClick -> optional element to look for after click
-         * @param howLongToWaitForSelector -> optional time to look for the element after click
-         * @param delayAfterSelectorFound ->  optional delay after element found
+         * @param page the current page
+         * @param xpath the xpath to click. For example: /html/body/div[6]/div[1]/div[1]/h1
+         * @param delayAfterClick optional delay after click
+         * @param selectorToFindAfterClick optional element to look for after click
+         * @param howLongToWaitForSelector optional time to look for the element after click
+         * @param delayAfterSelectorFound  optional delay after element found
          */
         clickOnXPath: async function (page,
                                       xpath,
@@ -325,11 +347,11 @@ const self = module.exports = {
         /**
          * Will mouse click on an xpath
          *
-         * @param page -> the current page
-         * @param xpath -> the xpath to click
-         * @param selector -> the selector to click. For example: a:nth-of-type(2)
-         * @param mouseBtn -> the mouse btn to click ('left'/'right')
-         * @param delayAfterClick -> optional delay after click
+         * @param page the current page
+         * @param xpath the xpath to click
+         * @param selector the selector to click. For example: a:nth-of-type(2)
+         * @param mouseBtn the mouse btn to click ('left'/'right')
+         * @param delayAfterClick optional delay after click
          */
         mouseClickOnXPath: async function (page,
                                            xpath,
@@ -342,10 +364,10 @@ const self = module.exports = {
         /**
          * Will mouse click on a selector
          *
-         * @param page -> the current page
-         * @param selector -> the selector to click. For example: a:nth-of-type(2)
-         * @param mouseBtn -> the mouse btn to click ('left'/'right')
-         * @param delayAfterClick -> optional delay after click
+         * @param page the current page
+         * @param selector the selector to click. For example: a:nth-of-type(2)
+         * @param mouseBtn the mouse btn to click ('left'/'right')
+         * @param delayAfterClick optional delay after click
          */
         mouseClickOnSelector: async function (page,
                                               selector,
@@ -358,18 +380,18 @@ const self = module.exports = {
         /**
          * Will mouse click on a selector which contains text
          *
-         * @param page -> the puppeteer page
-         * @param selector -> the selector to click. For example: 'div'
-         * @param text -> the element's innerText
-         * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
-         * @param includes -> set to true if to click on an element based on contains() text
-         * @param identical -> set to true if to click on an element which has the EXACT text ( === )
-         * @param innerHTML -> set to true for innerHTML. False for innerText
-         * @param mouseBtn -> the mouse btn to click ('left'/'right')
-         * @param delayAfterClick -> optional delay after click
-         * @param selectorToFindAfterClick -> optional element to look for after click
-         * @param howLongToWaitForSelector -> optional time to look for the element after click
-         * @param delayAfterSelectorFound ->  optional delay after element found
+         * @param page the puppeteer page
+         * @param selector the selector to click. For example: 'div'
+         * @param text the element's innerText
+         * @param caseSensitive toggle this to find the exact text or to ignore higher/lower cases
+         * @param includes set to true if to click on an element based on contains() text
+         * @param identical set to true if to click on an element which has the EXACT text ( === )
+         * @param innerHTML set to true for innerHTML. False for innerText
+         * @param mouseBtn the mouse btn to click ('left'/'right')
+         * @param delayAfterClick optional delay after click
+         * @param selectorToFindAfterClick optional element to look for after click
+         * @param howLongToWaitForSelector optional time to look for the element after click
+         * @param delayAfterSelectorFound  optional delay after element found
          */
         mouseClickOnSelectorContainsText: async function (page,
                                                           selector,
@@ -391,9 +413,9 @@ const self = module.exports = {
         /**
          * Will mouse click on element
          *
-         * @param element -> the element to click
-         * @param mouseBtn -> the mouse btn to click ('left'/'right')
-         * @param delayAfterClick -> optional delay after click
+         * @param element the element to click
+         * @param mouseBtn the mouse btn to click ('left'/'right')
+         * @param delayAfterClick optional delay after click
          */
         mouseClickOnElement: async function (element,
                                              mouseBtn = 'left',
@@ -408,12 +430,12 @@ const self = module.exports = {
         /**
          * Will click an element/selector
          *
-         * @param page -> the current page
-         * @param element -> the element to click upon
-         * @param delayAfterClick -> optional delay after click
-         * @param selectorToFindAfterClick -> optional element to look for after click
-         * @param howLongToWaitForSelector -> optional time to look for the element after click
-         * @param delayAfterSelectorFound ->  optional delay after element found
+         * @param page the current page
+         * @param element the element to click upon
+         * @param delayAfterClick optional delay after click
+         * @param selectorToFindAfterClick optional element to look for after click
+         * @param howLongToWaitForSelector optional time to look for the element after click
+         * @param delayAfterSelectorFound  optional delay after element found
          */
         clickOnElement: async function (page,
                                         element,
@@ -470,9 +492,9 @@ const self = module.exports = {
          * Will download a file.
          * NOTICE: if you only want to change the saving location of a file, call setDownloadedFilesLocation(output).
          *
-         * @param page -> the puppeteer page
-         * @param outputPath -> the path to the downloaded file
-         * @param downloadSelector -> the selector to click in order to start the download
+         * @param page the puppeteer page
+         * @param outputPath the path to the downloaded file
+         * @param downloadSelector the selector to click in order to start the download
          */
         downloadFile: async function (page, outputPath, downloadSelector) {
             self.setDownloadedFilesLocation(page, outputPath);
@@ -524,17 +546,17 @@ const self = module.exports = {
          * Will click on an element which contains text
          * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
          *
-         * @param page -> the puppeteer page
-         * @param selector -> the selector to click. For example: a:nth-of-type(2)
-         * @param text -> the element's innerText
-         * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
-         * @param includes -> set to true if to click on an element based on contains() text
-         * @param identical -> set to true if to click on an element which has the EXACT text ( === )
-         * @param innerHTML -> set to true for innerHTML. False for innerText
-         * @param delayAfterClick -> optional delay after click
-         * @param selectorToFindAfterClick -> optional element to look for after click
-         * @param howLongToWaitForSelector -> optional time to look for the element after click
-         * @param delayAfterSelectorFound ->  optional delay after element found
+         * @param page the puppeteer page
+         * @param selector the selector to click. For example: a:nth-of-type(2)
+         * @param text the element's innerText
+         * @param caseSensitive toggle this to find the exact text or to ignore higher/lower cases
+         * @param includes set to true if to click on an element based on contains() text
+         * @param identical set to true if to click on an element which has the EXACT text ( === )
+         * @param innerHTML set to true for innerHTML. False for innerText
+         * @param delayAfterClick optional delay after click
+         * @param selectorToFindAfterClick optional element to look for after click
+         * @param howLongToWaitForSelector optional time to look for the element after click
+         * @param delayAfterSelectorFound  optional delay after element found
          */
         clickOnElementContainsText: async function (page,
                                                     selector,
@@ -557,13 +579,13 @@ const self = module.exports = {
          * Will return an element contains text
          * for example("div", "Floki") will click on a div with an innerText of "Floki" (uppercase sensitive)
          *
-         * @param page -> the puppeteer page
-         * @param selector -> the selector to find. For example: a:nth-of-type(2)
-         * @param text -> the element's innerText
-         * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
-         * @param includes -> set to true if the element contains text
-         * @param identical -> set to true if element has the EXACT text ( === )
-         * @param innerHTML -> set to true for innerHTML. False for innerText
+         * @param page the puppeteer page
+         * @param selector the selector to find. For example: a:nth-of-type(2)
+         * @param text the element's innerText
+         * @param caseSensitive toggle this to find the exact text or to ignore higher/lower cases
+         * @param includes set to true if the element contains text
+         * @param identical set to true if element has the EXACT text ( === )
+         * @param innerHTML set to true for innerHTML. False for innerText
          */
         getElementByText: async function (page,
                                           selector,
@@ -739,13 +761,13 @@ const self = module.exports = {
         /**
          * Will click on a an element which happens to be before or after a label.
          *
-         * @param page -> the puppeteer page
-         * @param innerHTML -> set to true to look on the label's innerHTML. False for innerText
-         * @param labelText -> the label's innerHTML
-         * @param caseSensitive -> toggle this to find the exact text or to ignore higher/lower cases
-         * @param includes -> set to true if the element contains()
-         * @param identical -> set to true if the label has the EXACT text ( === )
-         * @param isElementAfterLabel -> set to false if the element is before the label (rtl pages)
+         * @param page the puppeteer page
+         * @param innerHTML set to true to look on the label's innerHTML. False for innerText
+         * @param labelText the label's innerHTML
+         * @param caseSensitive toggle this to find the exact text or to ignore higher/lower cases
+         * @param includes set to true if the element contains()
+         * @param identical set to true if the label has the EXACT text ( === )
+         * @param isElementAfterLabel set to false if the element is before the label (rtl pages)
          */
         clickOnElementWithAdjacentLabel: async function (page,
                                                          labelText,
@@ -788,13 +810,13 @@ const self = module.exports = {
 
         /**
          * Will select an element from drop down (from <select>)
-         * @param page -> the puppetter page
-         * @param dropDownSelectorOrElement -> the <select> element, in a form of selector or element
-         * @param optionSelectorOrElementToSelect -> the <option> to select from the drop down
-         * @param delayAfterClick -> how long to wait after click
-         * @param selectorToFindAfterClick -> selector to search afterwards
-         * @param howLongToWaitForSelector -> if you chose to wait afterwards, set how long
-         * @param delayAfterSelectorFound -> if you chose to wait afterwards, set how long to wait after
+         * @param page the puppetter page
+         * @param dropDownSelectorOrElement the <select> element, in a form of selector or element
+         * @param optionSelectorOrElementToSelect the <option> to select from the drop down
+         * @param delayAfterClick how long to wait after click
+         * @param selectorToFindAfterClick selector to search afterwards
+         * @param howLongToWaitForSelector if you chose to wait afterwards, set how long
+         * @param delayAfterSelectorFound if you chose to wait afterwards, set how long to wait after
          */
         selectFromDropDown: async function (page,
                                             dropDownSelectorOrElement,
@@ -926,12 +948,12 @@ const self = module.exports = {
         /**
          * Will remove elements contains a certain text from a list
          *
-         * @param page -> the puppeteer page
-         * @param elesList -> the list of elements to search the inner text
-         * @param text -> the inner text to look for
-         * @param caseSensitive -> ignore capitals etc...
-         * @param includes -> true if only included part from element text comprise your text, and not all of it
-         * @param identical -> true for exact text match
+         * @param page the puppeteer page
+         * @param elesList the list of elements to search the inner text
+         * @param text the inner text to look for
+         * @param caseSensitive ignore capitals etc...
+         * @param includes true if only included part from element text comprise your text, and not all of it
+         * @param identical true for exact text match
          */
         removeElementsContainTextFromList: async function (page, elesList, text, caseSensitive = false, includes = true, identical = false) {
 
